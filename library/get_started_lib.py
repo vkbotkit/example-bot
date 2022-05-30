@@ -1,7 +1,6 @@
 """
 Пример плагина для vkbotkit
 """
-
 from vkbotkit.objects import (
     decorators,
     filters,
