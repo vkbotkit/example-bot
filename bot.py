@@ -8,7 +8,7 @@ from os import (
     )
 from sys import argv
 from dotenv import load_dotenv
-from vkbotkit import librabot
+from vkbotkit import Librabot
 from vkbotkit.objects import (
     #decorators,
     #filters,
@@ -23,15 +23,15 @@ async def main():
     """
     if "-d" in argv:
         token = environ['DEBUG_TOKEN']
-        log_level = enums.log_level.DEBUG
+        log_level = enums.LogLevel.DEBUG
 
     else:
         token = environ['PUBLIC_TOKEN']
-        log_level = enums.log_level.INFO
+        log_level = enums.LogLevel.INFO
 
     config_log = getenv("CONFIG_LOG", default = "")
 
-    bot = librabot(token)
+    bot = Librabot(token)
     bot.toolkit.configure_logger(log_level, "f" in config_log, "c" in config_log)
     bot.library.import_library()
 

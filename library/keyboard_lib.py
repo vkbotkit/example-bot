@@ -1,31 +1,51 @@
-from vkbotkit.objects import decorators, filters, enums, library_module
-from vkbotkit.objects.keyboard import *
-
 """
 Copyright 2022 kensoi
 """
+from vkbotkit.objects import decorators, filters, enums, LibraryModule
+from vkbotkit.objects.keyboard import (
+    Keyboard, KeyboardColor
+)
 
-class Main(library_module):
+
+class Main(LibraryModule):
+    """
+    Пример плагина с клавиатурой
+    """
+    def __init__(self):
+        LibraryModule.__init__(self)
+        self.keyboard_test = None
+        self.keyboard_test2 = None
+
+
     async def start(self, toolkit):
-        self.keyboardTest = keyboard(one_time = False, inline = True)
-        self.keyboardTest2 = keyboard(one_time = False, inline = True)
+        """
+        Функция, выполняющаяся при запуске бота
+        """
+        self.keyboard_test = Keyboard(one_time = False, inline = True)
+        self.keyboard_test2 = Keyboard(one_time = False, inline = True)
 
-        self.keyboardTest.add_button("канари помощь", keyboardcolor.PRIMARY)
-        self.keyboardTest.add_line()
-        self.keyboardTest.add_button("Test1")
-        self.keyboardTest.add_button("Test2")
-        self.keyboardTest.add_line()
-        self.keyboardTest.add_button("Test3")
-        
-        self.keyboardTest2.add_button("тесто", keyboardcolor.PRIMARY)
-        self.keyboardTest2.add_line()
-        self.keyboardTest2.add_location_button()
+        self.keyboard_test.add_button("Кнопка 1", KeyboardColor.PRIMARY)
+        self.keyboard_test.add_line()
+        self.keyboard_test.add_button("A")
+        self.keyboard_test.add_button("B")
+        self.keyboard_test.add_line()
+        self.keyboard_test.add_button("C")
 
-    @decorators.callback(filters.whichUpdate({enums.events.message_new,}))
-    async def send_hello(self, package):
+        self.keyboard_test2.add_button("Кнопка 2", KeyboardColor.PRIMARY)
+        self.keyboard_test2.add_line()
+        self.keyboard_test2.add_location_button()
+        toolkit.log(
+            "keyboardlib loaded"
+        )
+
+    @decorators.callback(filters.WhichUpdate({enums.Events.MESSAGE_NEW,}))
+    async def send_keyboard(self, package):
+        """
+        Команда для отправки команды
+        """
         await package.toolkit.api.messages.send(
             random_id = package.toolkit.gen_random(),
             peer_id = package.peer_id,
             message = "Пример клавиатуры",
-            keyboard = self.keyboardTest.get_keyboard()
+            keyboard = self.keyboard_test.get_keyboard()
         )

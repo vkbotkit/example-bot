@@ -5,7 +5,7 @@ from vkbotkit.objects import (
     decorators,
     filters,
     #enums,
-    library_module)
+    LibraryModule)
 
 
 HELLO_ME = """
@@ -15,12 +15,12 @@ Not even sure that this is real
 """
 
 
-class Main(library_module):
+class Main(LibraryModule):
     """
     docstring fix
     """
 
-    @decorators.callback(filters.isCommand({"start",}))
+    @decorators.callback(filters.IsCommand({"start",}))
     async def send_hello(self, package):
         """
         при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
