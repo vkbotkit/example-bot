@@ -1,44 +1,40 @@
 """
-Bot application
+Copyright 2022 kensoi
 """
+
 import asyncio
-from os import (
-    environ,
-    getenv
-    )
+from os import environ, getenv
 from sys import argv
 from dotenv import load_dotenv
-from vkbotkit import Librabot
-from vkbotkit.objects import (
-    #decorators,
-    #filters,
-    enums,
-    #library_module
-)
 
+from vkbotkit import Librabot
+from vkbotkit.objects import enums
+
+load_dotenv()
+
+if "-d" in argv:
+    TOKEN = environ['DEBUG_TOKEN']
+    LOG_LEVEL = enums.LogLevel.DEBUG
+
+else:
+    TOKEN = environ['PUBLIC_TOKEN']
+    LOG_LEVEL = enums.LogLevel.INFO
+
+GROUP_ID = environ['GROUP_ID']
+CONFIG_LOG = getenv("CONFIG_LOG", default = "")
 
 async def main():
     """
-    главная функция приложения
+    Главная функция приложения
     """
-    if "-d" in argv:
-        token = environ['DEBUG_TOKEN']
-        log_level = enums.LogLevel.DEBUG
 
-    else:
-        token = environ['PUBLIC_TOKEN']
-        log_level = enums.LogLevel.INFO
-
-    config_log = getenv("CONFIG_LOG", default = "")
-
-    bot = Librabot(token)
-    bot.toolkit.configure_logger(log_level, "f" in config_log, "c" in config_log)
-    bot.library.import_library()
+    bot = Librabot(TOKEN, GROUP_ID)
+    bot.toolkit.configure_logger(LOG_LEVEL, "f" in CONFIG_LOG, "c" in CONFIG_LOG)
 
     # START POLLING
-    await bot.start_polling()
+    await bot.toolkit.start_polling()
 
 if __name__ == "__main__":
-    load_dotenv()
     loop = asyncio.new_event_loop()
-    loop.run_until_complete(main())
+    loop.create_task(main())
+    loop.run_forever()

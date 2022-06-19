@@ -1,7 +1,14 @@
 """
 Copyright 2022 kensoi
 """
-from vkbotkit.objects import decorators, filters, enums, LibraryModule
+
+from vkbotkit.utils import VERSION
+from vkbotkit.objects import (
+    callback,
+    filters,
+    enums,
+    LibraryModule)
+
 from vkbotkit.objects.keyboard import (
     Keyboard, KeyboardColor
 )
@@ -11,6 +18,7 @@ class Main(LibraryModule):
     """
     Пример плагина с клавиатурой
     """
+
     def __init__(self):
         LibraryModule.__init__(self)
         self.keyboard_test = None
@@ -38,7 +46,7 @@ class Main(LibraryModule):
             "keyboardlib loaded"
         )
 
-    @decorators.callback(filters.WhichUpdate({enums.Events.MESSAGE_NEW,}))
+    @callback(filters.WhichUpdate({enums.Events.MESSAGE_NEW,}))
     async def send_keyboard(self, package):
         """
         Команда для отправки команды
