@@ -3,38 +3,53 @@ Copyright 2022 kensoi
 """
 
 import asyncio
-from os import environ, getenv
+from os import getenv
 from sys import argv
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 from vkbotkit import Librabot
 from vkbotkit.objects import enums
 
-load_dotenv()
 
-if "-d" in argv:
-    TOKEN = environ['DEBUG_TOKEN']
-    LOG_LEVEL = enums.LogLevel.DEBUG
+def exception_handler(event_loop, context):
+    """
+    Вывод ошибок, возникших внутри event loop
+    """
 
-else:
-    TOKEN = environ['PUBLIC_TOKEN']
-    LOG_LEVEL = enums.LogLevel.INFO
+    print(f"Ошибка в цикле событий {repr(event_loop)}: {context}")
 
-GROUP_ID = environ['GROUP_ID']
-CONFIG_LOG = getenv("CONFIG_LOG", default = "")
+
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+loop.set_exception_handler(exception_handler)
+
 
 async def main():
     """
-    Главная функция приложения
+    Корень приложения VKBotKit v1.0a22 для работы через сообщество
     """
 
-    bot = Librabot(TOKEN, GROUP_ID)
-    bot.toolkit.configure_logger(LOG_LEVEL, "f" in CONFIG_LOG, "c" in CONFIG_LOG)
+    if "-d" in argv or getenv('DEBUG_MODE'):
+        token = getenv('DEBUG_TOKEN')
+        group_id = int(getenv('DEBUG_ID'))
+        log_level = enums.LogLevel.DEBUG
+
+    else:
+        token = getenv('PUBLIC_TOKEN')
+        group_id = int(getenv('PUBLIC_ID'))
+        log_level = enums.LogLevel.INFO
+
+    config_log = list(getenv("CONFIG_LOG", default = ""))
+    log_to_file = "f" in config_log # вывод лога в специальный файл
+    log_to_console = "c" in config_log # вывод лога в консоль
+
+    bot = Librabot(token, group_id)
+    bot.toolkit.configure_logger(log_level, log_to_file, log_to_console)
 
     # START POLLING
-    await bot.toolkit.start_polling()
+    await bot.start_polling()
+
 
 if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    load_dotenv()
+    loop.run_until_complete(main())

@@ -2,16 +2,8 @@
 Copyright 2022 kensoi
 """
 
-from vkbotkit.utils import VERSION
-from vkbotkit.objects import (
-    callback,
-    filters,
-    enums,
-    LibraryModule)
-
-from vkbotkit.objects.keyboard import (
-    Keyboard, KeyboardColor
-)
+from vkbotkit.objects import callback, filters, enums, LibraryModule
+from vkbotkit.objects.keyboard import Keyboard, KeyboardColor
 
 
 class Main(LibraryModule):
@@ -19,16 +11,14 @@ class Main(LibraryModule):
     Пример плагина с клавиатурой
     """
 
-    def __init__(self):
-        LibraryModule.__init__(self)
-        self.keyboard_test = None
-        self.keyboard_test2 = None
-
+    keyboard_test: Keyboard
+    keyboard_test2: Keyboard
 
     async def start(self, toolkit):
         """
         Функция, выполняющаяся при запуске бота
         """
+
         self.keyboard_test = Keyboard(one_time = False, inline = True)
         self.keyboard_test2 = Keyboard(one_time = False, inline = True)
 
@@ -42,9 +32,8 @@ class Main(LibraryModule):
         self.keyboard_test2.add_button("Кнопка 2", KeyboardColor.PRIMARY)
         self.keyboard_test2.add_line()
         self.keyboard_test2.add_location_button()
-        toolkit.log(
-            "keyboardlib loaded"
-        )
+        toolkit.log("keyboardlib loaded")
+
 
     @callback(filters.WhichUpdate({enums.Events.MESSAGE_NEW,}))
     async def send_keyboard(self, package):

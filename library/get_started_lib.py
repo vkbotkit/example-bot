@@ -1,47 +1,51 @@
 """
 Copyright 2022 kensoi
 """
-from vkbotkit.utils import VERSION
-from vkbotkit.objects import (
-    filters,
-    callback,
-    LibraryModule
-    )
 
-HELLO_ME = """
+from vkbotkit.objects import callback, filters, LibraryModule
+
+
+HELLO_MESSAGE = """
 Hello, world
 Programmed to work and not to feel
 Not even sure that this is real
 """
-VKBOTKIT_INFO = f"""
-Построено на VKBotKit
-Версия библиотеки: {VERSION}
+HELP_MESSAGE = """
+HELP INSTRUCTIONS HERE
 """
+
+
+class NewUser(filters.Filter):
+    """
+    Фильтр оповещений о новых участниках
+    """
+    async def check(self, package):
+        if not package.action:
+            return
+
+        if not hasattr(package.action, "type"):
+            return
+
+        return package.action == "chat_invite_user"
+
 
 class Main(LibraryModule):
     """
-    Пример плагина для VKBotKit
-    Все плагины, сгружаемые с каталога библиотеки, взаимодействуют только с Longpoll событиями.
+    Библиотека с командами, предназначенными для приветствия пользователей
     """
-    def __init__(self):
-        LibraryModule.__init__(self)
-        self.canary_att = None
 
-    @callback(filters.IsCommand({"начать", "привет", "старт"}))
+    @callback(filters.IsCommand({"start",}) | NewUser())
     async def send_hello(self, package):
         """
-        Приветствие бота
+        при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
         """
-        await package.toolkit.send_reply(package, HELLO_ME)
+        await package.toolkit.send_reply(package, HELLO_MESSAGE)
 
 
-    @callback(filters.IsCommand({"канари", "движок"}))
-    async def send_engine_info(self, package):
+    @callback(filters.IsCommand({"help",}))
+    async def send_help(self, package):
         """
-        Приветствие бота
+        при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
         """
-        if not self.canary_att:
-            self.canary_att = await package.toolkit.uploader.photo_messages("preview.png")
-
-        await package.toolkit.send_reply(package, VKBOTKIT_INFO, self.canary_att)
+        await package.toolkit.send_reply(package, HELP_MESSAGE)
         
