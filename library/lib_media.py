@@ -24,9 +24,10 @@ class HasPhoto(filters.Filter):
     """
     Фильтр для сообщений, содержащих фото
     """
+
     async def check(self, package):
         if not package.attachments:
-            return
+            return False
 
         photos_filter = filter(lambda x: x['type'] == 'photo', package.attachments)
 
@@ -37,15 +38,19 @@ class StickerFilter(filters.Filter):
     """
     Фильтр для стикеров
     """
+
     async def check(self, package):
         """
         Проверка на наличии стикера в сообщении
         """
-        if hasattr(package, "attachments"):
-            if package.attachments[0]['type'] == "sticker":
-                return True
 
-        return False
+        if not hasattr(package, "attachments"):
+            return False
+
+        if len(package.attachments) == 0:
+            return False
+
+        return package.attachments[0]['type'] == "sticker"
 
 
 async def download_file(toolkit, download_url):
@@ -92,7 +97,7 @@ class Main(LibraryModule):
         await package.toolkit.send_reply(package, DOWNLOAD_PHOTO_MESSAGE)
 
 
-    @callback(filters.IsCommand({"media", "медиа", "медия"}) & HasPhoto())
+    @callback(filters.IsCommand({"media", "медиа", "медия"}) & filters.Negation(HasPhoto()))
     async def send_media_help(self, package):
         """
         Инструкции к download_media обработчику

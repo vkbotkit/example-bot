@@ -4,6 +4,20 @@ Copyright 2022 kensoi
 
 from vkbotkit.objects import callback, filters, keyboard, LibraryModule
 
+# важное замечание для клавиатуры
+# для работы этого плагина необходимо включить возможности чат-ботов
+# vk.com/your_bot_id?act=messages&tab=bots
+
+keyboard_test = keyboard.Keyboard(one_time = False, inline = True)
+
+keyboard_test.add_button("Кнопка 1", keyboard.KeyboardColor.PRIMARY)
+keyboard_test.add_button("A")
+keyboard_test.add_button("B")
+keyboard_test.add_line()
+keyboard_test.add_button("Кнопка 2", keyboard.KeyboardColor.PRIMARY)
+keyboard_test.add_button("C")
+keyboard_test.add_button("D")
+
 
 class Main(LibraryModule):
     """
@@ -11,22 +25,11 @@ class Main(LibraryModule):
     """
 
     @callback(filters.IsCommand({"keyboard", "клавиатура"}))
-    async def send_keyboard(self, package):
+    async def send_keyboard(self, package, toolkit):
         """
         Команда для отправки команды
         """
-        keyboard_test = keyboard.Keyboard(one_time = False, inline = True)
 
-        keyboard_test.add_button("Кнопка 1", keyboard.KeyboardColor.PRIMARY)
-        keyboard_test.add_line()
-        keyboard_test.add_button("A")
-        keyboard_test.add_button("B")
-        keyboard_test.add_line()
-        keyboard_test.add_button("C")
-
-        await package.toolkit.api.messages.send(
-            random_id = package.toolkit.gen_random(),
-            peer_id = package.peer_id,
-            message = "Пример клавиатуры",
-            keyboard = keyboard_test.get_keyboard()
-        )
+        await toolkit.send_reply(
+            package, "Пример клавиатуры",
+            keyboard = keyboard_test.get_keyboard())

@@ -19,14 +19,15 @@ class NewUser(filters.Filter):
     """
     Фильтр оповещений о новых участниках
     """
+
     async def check(self, package):
         if not hasattr(package, "action"):
-            return
+            return False
 
         if not hasattr(package.action, "type"):
-            return
+            return False
 
-        return package.action == "chat_invite_user"
+        return package.action.type == "chat_invite_user"
 
 
 class Main(LibraryModule):
@@ -39,6 +40,7 @@ class Main(LibraryModule):
         """
         при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
         """
+
         await package.toolkit.send_reply(package, HELLO_MESSAGE)
 
 
@@ -47,5 +49,5 @@ class Main(LibraryModule):
         """
         при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
         """
+
         await package.toolkit.send_reply(package, HELP_MESSAGE)
-        
