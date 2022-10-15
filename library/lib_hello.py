@@ -22,12 +22,12 @@ class NewUser(filters.Filter):
 
     async def check(self, package):
         if not hasattr(package, "action"):
-            return
+            return False
 
         if not hasattr(package.action, "type"):
-            return
+            return False
 
-        return package.action == "chat_invite_user"
+        return package.action.type == "chat_invite_user"
 
 
 class Main(Library):
