@@ -20,7 +20,7 @@ class NewUser(filters.Filter):
     Фильтр оповещений о новых участниках
     """
     async def check(self, package):
-        if not package.action:
+        if not hasattr(package, "action"):
             return
 
         if not hasattr(package.action, "type"):
