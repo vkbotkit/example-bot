@@ -5,7 +5,7 @@ Copyright 2022 kensoi
 import asyncio
 from os import path
 from urllib.parse import urlparse
-from vkbotkit.objects import callback, filters, LibraryModule
+from vkbotkit.objects import callback, filters, Library
 from vkbotkit import utils
 
 
@@ -24,6 +24,7 @@ class HasPhoto(filters.Filter):
     """
     Фильтр для сообщений, содержащих фото
     """
+    
     async def check(self, package):
         if not package.attachments:
             return
@@ -37,15 +38,20 @@ class StickerFilter(filters.Filter):
     """
     Фильтр для стикеров
     """
+
     async def check(self, package):
         """
         Проверка на наличии стикера в сообщении
         """
-        if hasattr(package, "attachments"):
-            if package.attachments[0]['type'] == "sticker":
-                return True
 
-        return False
+        if not hasattr(package, "attachments"):
+            return False
+
+        if len(package.attachments) == 0:
+            return False
+
+        return package.attachments[0]['type'] == "sticker"
+
 
 
 async def download_file(toolkit, download_url):
@@ -68,14 +74,14 @@ async def download_file(toolkit, download_url):
     return file_name
 
 
-class Main(LibraryModule):
+class Main(Library):
     """
     Библиотека с примером работы toolkit.assets и toolkit.uploader
     """
 
 
     @callback(filters.IsCommand({"media", "медиа", "медия"}) & HasPhoto())
-    async def download_media(self, package):
+    async def download_media(self, package, toolkit):
         """
         Обработчик отправленных пользователем фотографий, который сохраняет
         скачанные фото в папку ассетов
@@ -89,20 +95,20 @@ class Main(LibraryModule):
         ))
 
         await asyncio.gather(*[download_file(package.toolkit, image) for image in photos])
-        await package.toolkit.send_reply(package, DOWNLOAD_PHOTO_MESSAGE)
+        await toolkit.send_reply(package, DOWNLOAD_PHOTO_MESSAGE)
 
 
-    @callback(filters.IsCommand({"media", "медиа", "медия"}) & HasPhoto())
-    async def send_media_help(self, package):
+    @callback(filters.IsCommand({"media", "медиа", "медия"}) & filters.Negation(HasPhoto()))
+    async def send_media_help(self, package, toolkit):
         """
         Инструкции к download_media обработчику
         """
 
-        await package.toolkit.send_reply(package, NO_PHOTO_MESSAGE)
+        await toolkit.send_reply(package, NO_PHOTO_MESSAGE)
 
 
     @callback(StickerFilter())
-    async def download_sticker(self, package):
+    async def download_sticker(self, package, toolkit):
         """
         Обработчик отправленных пользователем стикеров, который сохраняет
         скачанные стикеры в папку ассетов
@@ -110,6 +116,6 @@ class Main(LibraryModule):
 
         sticker = package.attachments[0]['sticker']
         filtered = filter(lambda image: image['height'] == 512, sticker['images'])
-        result = await download_file(package.toolkit, list(filtered)[0]['url'])
+        result = await download_file(toolkit, list(filtered)[0]['url'])
 
-        await package.toolkit.send_reply(package, STICKER_DOWNLOADED.format(result))
+        await toolkit.send_reply(package, STICKER_DOWNLOADED.format(result))

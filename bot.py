@@ -7,26 +7,17 @@ from os import getenv
 from sys import argv
 
 from dotenv import load_dotenv
-from vkbotkit import Librabot
+from vkbotkit import Bot
 from vkbotkit.objects import enums
-
-
-def exception_handler(event_loop, context):
-    """
-    Вывод ошибок, возникших внутри event loop
-    """
-
-    print(f"Ошибка в цикле событий {repr(event_loop)}: {context}")
 
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-loop.set_exception_handler(exception_handler)
 
 
 async def main():
     """
-    Корень приложения VKBotKit v1.0a22 для работы через сообщество
+    Корень приложения VKBotKit v1.1a7 для работы через сообщество
     """
 
     if "-d" in argv or getenv('DEBUG_MODE'):
@@ -43,7 +34,7 @@ async def main():
     log_to_file = "f" in config_log # вывод лога в специальный файл
     log_to_console = "c" in config_log # вывод лога в консоль
 
-    bot = Librabot(token, group_id)
+    bot = Bot(token, group_id)
     bot.toolkit.configure_logger(log_level, log_to_file, log_to_console)
 
     # START POLLING
