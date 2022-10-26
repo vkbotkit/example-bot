@@ -70,12 +70,12 @@ class Main(Library):
         chat_members = await toolkit.get_chat_members(package.peer_id)
         chat_members.remove(package.from_id)
         chat_members_mapped = map(lambda x: Mention(x, "."), chat_members)
-        chat_members_repred = map(lambda x: x.repr, chat_members_mapped)
+        chat_members_repred = map(repr, chat_members_mapped)
         chat_members = " ".join(list(chat_members_repred))
 
         user_mention = await toolkit.create_mention(package.from_id)
         response = SOZYV.format(
-                sender = user_mention.repr,
+                sender = repr(user_mention),
                 members = chat_members)
         toolkit.messages.send(package, response,
             attachment = "photo-195675828_457242153")
