@@ -33,6 +33,6 @@ class Main(Library):
         Команда для отправки команды
         """
 
-        await toolkit.messages.reply(
+        await toolkit.messages.send(
             package, "Пример клавиатуры",
             keyboard = keyboard_test.get_keyboard())

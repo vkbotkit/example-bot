@@ -38,7 +38,7 @@ class Main(Library):
         при получении команды '@botname созвать' в диалоге => отправлять текст ONLY_CHAT_COMMAND
         """
 
-        await toolkit.messages.reply(package, ONLY_CHAT_COMMAND)
+        await toolkit.messages.send(package, ONLY_CHAT_COMMAND)
 
 
     @callback(IsCommand({"созвать", "позвать", "созыв"}) & Negation(IsBotAdmin()))
@@ -48,7 +48,7 @@ class Main(Library):
         прав админа у бота => отправлять текст NO_ADMIN_RIGHTS
         """
 
-        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS)
+        await toolkit.messages.send(package, NO_ADMIN_RIGHTS)
 
 
     @callback(IsCommand({"созвать", "позвать", "созыв"}) & IsBotAdmin() & Negation(IsUserAdmin()))
@@ -58,7 +58,7 @@ class Main(Library):
         прав админа у пользователя => отправлять текст NO_ADMIN_RIGHTS_AT_USER
         """
 
-        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS_AT_USER)
+        await toolkit.messages.send(package, NO_ADMIN_RIGHTS_AT_USER)
 
 
     @callback(IsCommand({"созвать", "позвать", "созыв"}) & IsBotAdmin() & IsUserAdmin())
@@ -77,5 +77,5 @@ class Main(Library):
         response = SOZYV.format(
                 sender = user_mention.repr,
                 members = chat_members)
-        toolkit.messages.reply(package, response,
+        toolkit.messages.send(package, response,
             attachment = "photo-195675828_457242153")

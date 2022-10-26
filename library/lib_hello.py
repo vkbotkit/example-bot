@@ -27,7 +27,7 @@ class Main(Library):
         """
         при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
         """
-        await toolkit.messages.reply(package, HELLO_MESSAGE)
+        await toolkit.messages.send(package, HELLO_MESSAGE)
 
 
     @callback(IsCommand({"help",}) | IsThatText({"Помощь",}))
@@ -36,5 +36,5 @@ class Main(Library):
         при получении команды '@your_bot_id start' => отправлять текст HELLO_ME
         """
 
-        await toolkit.messages.reply(package, HELP_MESSAGE)
+        await toolkit.messages.send(package, HELP_MESSAGE)
         

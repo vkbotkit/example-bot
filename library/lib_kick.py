@@ -48,7 +48,7 @@ class Main(Library):
         при получении команды '@botname созвать' в диалоге => отправлять текст ONLY_CHAT_COMMAND
         """
 
-        await toolkit.messages.reply(package, ONLY_CHAT_COMMAND)
+        await toolkit.messages.send(package, ONLY_CHAT_COMMAND)
 
 
     @callback(IsCommand({"кик", "исключить", "выкинуть"}) & Negation(IsBotAdmin()))
@@ -58,7 +58,7 @@ class Main(Library):
         прав админа у бота => отправлять текст NO_ADMIN_RIGHTS
         """
 
-        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS)
+        await toolkit.messages.send(package, NO_ADMIN_RIGHTS)
 
 
     @callback(IsCommand({"кик", "исключить", "выкинуть"}) & IsBotAdmin() & Negation(IsUserAdmin()))
@@ -68,7 +68,7 @@ class Main(Library):
         прав админа у пользователя => отправлять текст NO_ADMIN_RIGHTS_AT_USER
         """
 
-        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS_AT_USER)
+        await toolkit.messages.send(package, NO_ADMIN_RIGHTS_AT_USER)
 
 
     @callback(IsCommand({"кик", "исключить", "выкинуть"}) & IsBotAdmin() & IsUserAdmin())
@@ -87,20 +87,20 @@ class Main(Library):
             user_map.append(package.reply_message.from_id)
 
         if len(user_map) == 0:
-            await toolkit.messages.reply(package, KICK_EXCEPT_NO_USER)
+            await toolkit.messages.send(package, KICK_EXCEPT_NO_USER)
 
         else:
             user_list = await toolkit.get_chat_members(package.peer_id)
             admin_list = await toolkit.get_chat_admins(package.peer_id)
 
-            await toolkit.messages.reply(package, KICK_START)
+            await toolkit.messages.send(package, KICK_START)
 
             for i in user_map:
                 mention = Mention(i)
 
                 if i in user_list:
                     if i in admin_list:
-                        await toolkit.messages.reply(
+                        await toolkit.messages.send(
                             package,
                             KICK_EXCEPT_ADMIN.format(mention.repr)
                             )
@@ -111,7 +111,7 @@ class Main(Library):
                             user_id = i
                         )
                 else:
-                    await toolkit.messages.reply(
+                    await toolkit.messages.send(
                         package,
                         KICK_EXCEPT_NO_MEMBER.format(mention)
                         )

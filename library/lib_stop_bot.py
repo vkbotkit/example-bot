@@ -39,7 +39,7 @@ class Main(Library):
         при получении команды '@kyokoubot стоп' => выключать бота
         """
 
-        await toolkit.messages.reply(package, END_POLLING)
+        await toolkit.messages.send(package, END_POLLING)
         toolkit.stop_polling()
 
 
@@ -49,5 +49,5 @@ class Main(Library):
         при получении команды '@kyokoubot стоп' => выключать бота
         """
 
-        await toolkit.messages.reply(package, NO_END_POLLING)
+        await toolkit.messages.send(package, NO_END_POLLING)
         toolkit.stop_polling()

@@ -102,7 +102,7 @@ class Main(Library):
         ))
 
         await asyncio.gather(*[download_file(toolkit, image) for image in photos])
-        await toolkit.messages.reply(package, DOWNLOAD_PHOTO_MESSAGE)
+        await toolkit.messages.send(package, DOWNLOAD_PHOTO_MESSAGE)
 
 
     @callback(IsCommand({"media", "медиа", "медия"}) & Negation(HasPhoto()))
@@ -111,7 +111,7 @@ class Main(Library):
         Инструкции к download_media обработчику
         """
 
-        await toolkit.messages.reply(package, NO_PHOTO_MESSAGE)
+        await toolkit.messages.send(package, NO_PHOTO_MESSAGE)
 
 
     @callback(StickerFilter())
@@ -125,4 +125,4 @@ class Main(Library):
         filtered = filter(lambda image: image['height'] == 512, sticker['images'])
         result = await download_file(toolkit, list(filtered)[0]['url'])
 
-        await toolkit.messages.reply(package, STICKER_DOWNLOADED.format(result))
+        await toolkit.messages.send(package, STICKER_DOWNLOADED.format(result))
