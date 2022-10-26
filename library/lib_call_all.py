@@ -2,13 +2,11 @@
 Copyright 2022 kensoi
 """
 
-from vkbotkit.objects import data,
-    filters,
-    exceptions,
-    enums,
-    callback,
-    Library,
-    Mention)
+from vkbotkit.objects import Library
+from vkbotkit.objects.filters.filter import Negation
+from vkbotkit.objects.filters.message import IsCommand, IsUserAdmin, IsUserChat, IsBotAdmin
+from vkbotkit.objects.callback import callback
+from vkbotkit.objects.mention import Mention
 
 
 SOZYV = """
@@ -27,44 +25,57 @@ ONLY_CHAT_COMMAND = """
 """
 
 
-class Main(LibraryModule):
+class Main(Library):
     """
     Плагин для управления беседой при помощи VKBotKit
     Команды в этом плагине:
     @botname созвать
-    @botname кик
     """
 
-    @callback(filters.IsCommand({"созвать", "позвать", "созыв"}))
-    async def sozyv(self, package, toolkit):
+    @callback(IsCommand({"созвать", "позвать", "созыв"}) & IsUserChat())
+    async def sozyv_user(self, toolkit, package):
+        """
+        при получении команды '@botname созвать' в диалоге => отправлять текст ONLY_CHAT_COMMAND
+        """
+
+        await toolkit.messages.reply(package, ONLY_CHAT_COMMAND)
+
+
+    @callback(IsCommand({"созвать", "позвать", "созыв"}) & Negation(IsBotAdmin()))
+    async def sozyv_no_bot_admin(self, toolkit, package):
+        """
+        при получении команды '@botname созвать' при отсутствии
+        прав админа у бота => отправлять текст NO_ADMIN_RIGHTS
+        """
+
+        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS)
+
+
+    @callback(IsCommand({"созвать", "позвать", "созыв"}) & IsBotAdmin() & Negation(IsUserAdmin()))
+    async def sozyv_no_admin(self, toolkit, package):
+        """
+        при получении команды '@botname созвать' при отсутствии
+        прав админа у пользователя => отправлять текст NO_ADMIN_RIGHTS_AT_USER
+        """
+
+        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS_AT_USER)
+
+
+    @callback(IsCommand({"созвать", "позвать", "созыв"}) & IsBotAdmin() & IsUserAdmin())
+    async def sozyv_admin(self, toolkit, package):
         """
         при получении команды '@botname созвать' => отправлять текст SOZYV
         """
-        
-        if package.peer_id == package.from_id:
-            await toolkit.send_reply(package, ONLY_CHAT_COMMAND)
-            return
-        
-        if not await toolkit.is_admin(package.peer_id, package.from_id):
-            await toolkit.send_reply(package, NO_ADMIN_RIGHTS_AT_USER)
-            return
-        
-        else:
-            try:
-                chat_members = await toolkit.get_chat_members(package.peer_id)
-                chat_members.remove(package.from_id)
-                chat_members_mapped = map(lambda x: Mention(x, "."), chat_members)
-                chat_members_repred = map(lambda x: x.repr, user_list)
-                chat_members = " ".join(list(chat_members_repred))
 
-                user_mention = await toolkit.create_mention(package.from_id)
-                response = SOZYV.format(
-                        sender = user_mention.repr,
-                        members = chat_members)
-                toolkit.send_reply(package, response,
-                    attachment = "photo-195675828_457242153")
+        chat_members = await toolkit.get_chat_members(package.peer_id)
+        chat_members.remove(package.from_id)
+        chat_members_mapped = map(lambda x: Mention(x, "."), chat_members)
+        chat_members_repred = map(lambda x: x.repr, chat_members_mapped)
+        chat_members = " ".join(list(chat_members_repred))
 
-            except exceptions.MethodError as response_error:
-                await toolkit.log(response_error, log_level = enums.LogLevel.DEBUG)
-                await toolkit.send_reply(package, NO_ADMIN_RIGHTS)
-        else:
+        user_mention = await toolkit.create_mention(package.from_id)
+        response = SOZYV.format(
+                sender = user_mention.repr,
+                members = chat_members)
+        toolkit.messages.reply(package, response,
+            attachment = "photo-195675828_457242153")

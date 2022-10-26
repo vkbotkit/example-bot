@@ -2,13 +2,11 @@
 Copyright 2022 kensoi
 """
 
-from vkbotkit.objects import data,
-    filters,
-    exceptions,
-    enums,
-    callback,
-    Library,
-    Mention)
+from vkbotkit.objects import Library
+from vkbotkit.objects.filters.filter import Negation
+from vkbotkit.objects.filters.message import IsCommand, IsUserAdmin, IsUserChat, IsBotAdmin
+from vkbotkit.objects.callback import callback
+from vkbotkit.objects.mention import Mention
 
 
 NO_ADMIN_RIGHTS = """
@@ -37,28 +35,48 @@ KICK_EXCEPT_NO_MEMBER = """
 """
 
 
-class Main(LibraryModule):
+class Main(Library):
     """
     Плагин для управления беседой при помощи VKBotKit
     Команды в этом плагине:
-    @botname созвать
     @botname кик
     """
 
+    @callback(IsCommand({"кик", "исключить", "выкинуть"}) & IsUserChat())
+    async def sozyv_user(self, toolkit, package):
+        """
+        при получении команды '@botname созвать' в диалоге => отправлять текст ONLY_CHAT_COMMAND
+        """
 
-    @callback(filters.IsCommand({"кик", "исключить", "выкинуть"}))
-    async def kick(self, package, toolkit):
+        await toolkit.messages.reply(package, ONLY_CHAT_COMMAND)
+
+
+    @callback(IsCommand({"кик", "исключить", "выкинуть"}) & Negation(IsBotAdmin()))
+    async def sozyv_no_bot_admin(self, toolkit, package):
+        """
+        при получении команды '@botname созвать' при отсутствии
+        прав админа у бота => отправлять текст NO_ADMIN_RIGHTS
+        """
+
+        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS)
+
+
+    @callback(IsCommand({"кик", "исключить", "выкинуть"}) & IsBotAdmin() & Negation(IsUserAdmin()))
+    async def sozyv_no_admin(self, toolkit, package):
+        """
+        при получении команды '@botname созвать' при отсутствии
+        прав админа у пользователя => отправлять текст NO_ADMIN_RIGHTS_AT_USER
+        """
+
+        await toolkit.messages.reply(package, NO_ADMIN_RIGHTS_AT_USER)
+
+
+    @callback(IsCommand({"кик", "исключить", "выкинуть"}) & IsBotAdmin() & IsUserAdmin())
+    async def sozyv_admin(self, toolkit, package):
         """
         Функция для исключения пользователей
         """
-        
-        if package.peer_id == package.from_id:
-            await toolkit.send_reply(package, ONLY_CHAT_COMMAND)
 
-        if not toolkit.is_admin(package.peer_id, package.from_id):
-            await toolkit.send_reply(package, NO_ADMIN_RIGHTS_AT_USER)
-            return
-          
         user_map = []
 
         if hasattr(package, "fwd_messages"):
@@ -69,25 +87,20 @@ class Main(LibraryModule):
             user_map.append(package.reply_message.from_id)
 
         if len(user_map) == 0:
-            await toolkit.send_reply(package, KICK_EXCEPT_NO_USER)
+            await toolkit.messages.reply(package, KICK_EXCEPT_NO_USER)
 
         else:
-            try:
-                user_list = await toolkit.get_chat_members(package.peer_id)
-                admin_list = await toolkit.get_chat_admins(package.peer_id)
+            user_list = await toolkit.get_chat_members(package.peer_id)
+            admin_list = await toolkit.get_chat_admins(package.peer_id)
 
-            except exceptions.MethodError as response_error:
-                await toolkit.log(response_error, log_level = enums.LogLevel.DEBUG)
-                await toolkit.send_reply(package, NO_ADMIN_RIGHTS)
-
-            await toolkit.send_reply(package, KICK_START)
+            await toolkit.messages.reply(package, KICK_START)
 
             for i in user_map:
                 mention = Mention(i)
 
                 if i in user_list:
                     if i in admin_list:
-                        await toolkit.send_reply(
+                        await toolkit.messages.reply(
                             package,
                             KICK_EXCEPT_ADMIN.format(mention.repr)
                             )
@@ -98,7 +111,7 @@ class Main(LibraryModule):
                             user_id = i
                         )
                 else:
-                    await toolkit.send_reply(
+                    await toolkit.messages.reply(
                         package,
                         KICK_EXCEPT_NO_MEMBER.format(mention)
                         )

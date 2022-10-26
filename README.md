@@ -4,7 +4,7 @@
 
 ## Структура репозитория
 
-* `assets` - каталог с медиафайлами (доступ к файлам реализуется через `toolkit.assets` либо `tools.uploader`)
+* `assets` - каталог с медиафайлами (доступ к файлам реализуется через `toolkit.assets` либо `tools.upload`)
 * `library` - каталог со скриптами обработчиков
 * `bot.py` - корневой скрипт чатбота (для запуска и конфигурации основных настроек)
 * `requirements.txt` - файл с требуемыми библиотеками для работы шаблона
@@ -12,5 +12,5 @@
 
 ## Полезные ссылки
 
-* [vkbotkit/vkbotkit](https://github.com/vkbotkit/vkbotkit/tree/v1.1)
-* [vkbotkit/examples](https://github.com/vkbotkit/examples/tree/v1.1)
+* [vkbotkit/vkbotkit](https://github.com/vkbotkit/vkbotkit/tree/v1.2)
+* [vkbotkit/examples](https://github.com/vkbotkit/examples/tree/v1.2)

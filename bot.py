@@ -17,7 +17,7 @@ asyncio.set_event_loop(loop)
 
 async def main():
     """
-    Корень приложения VKBotKit v1.1a7 для работы через сообщество
+    Корень приложения VKBotKit v1.2a4 для работы через сообщество
     """
 
     if "-d" in argv or getenv('DEBUG_MODE'):

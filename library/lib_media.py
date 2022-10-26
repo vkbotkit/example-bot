@@ -5,9 +5,12 @@ Copyright 2022 kensoi
 import asyncio
 from os import path
 from urllib.parse import urlparse
-from vkbotkit.objects import callback, filters, Library
-from vkbotkit import utils
 
+from vkbotkit.objects import Library
+from vkbotkit.objects.callback import callback
+from vkbotkit.objects.filters.filter import Filter, Negation
+from vkbotkit.objects.filters.message import IsCommand
+from vkbotkit.utils import PATH_SEPARATOR
 
 DOWNLOAD_PHOTO_MESSAGE = """
 Фотографии сохранены в директории assets/downloads
@@ -20,26 +23,30 @@ NO_PHOTO_MESSAGE = """
 """
 
 
-class HasPhoto(filters.Filter):
+class HasPhoto(Filter):
     """
     Фильтр для сообщений, содержащих фото
     """
-    
-    async def check(self, package):
+
+    async def check(self, _, package):
+        """
+        Проверка условий
+        """
+
         if not package.attachments:
             return
 
-        photos_filter = filter(lambda x: x['type'] == 'photo', package.attachments)
+        photos_filter = list(filter(lambda x: x['type'] == 'photo', package.attachments))
 
         return len(photos_filter) != 0
 
 
-class StickerFilter(filters.Filter):
+class StickerFilter(Filter):
     """
     Фильтр для стикеров
     """
 
-    async def check(self, package):
+    async def check(self, _, package):
         """
         Проверка на наличии стикера в сообщении
         """
@@ -59,16 +66,16 @@ async def download_file(toolkit, download_url):
     Функция для сохранения изображения в папку assets
     """
 
-    file_name = "downloads" + utils.PATH_SEPARATOR + path.basename(urlparse(download_url).path)
+    file_name = "downloads" + PATH_SEPARATOR + path.basename(urlparse(download_url).path)
 
     if not file_name.endswith(".jpg"):
         if not file_name.endswith(".png"):
             file_name += ".png"
 
-    async with toolkit.core.session.get(download_url) as url_content:
+    async with toolkit._session.get(download_url) as url_content:
         file_content = await url_content.read()
 
-    with toolkit.assets(file_name, 'wb+') as created_file:
+    with toolkit.assets(file_name, 'wb+', encoding=None) as created_file:
         created_file.write(file_content)
 
     return file_name
@@ -76,12 +83,12 @@ async def download_file(toolkit, download_url):
 
 class Main(Library):
     """
-    Библиотека с примером работы toolkit.assets и toolkit.uploader
+    Библиотека с примером работы toolkit.assets и toolkit.upload
     """
 
 
-    @callback(filters.IsCommand({"media", "медиа", "медия"}) & HasPhoto())
-    async def download_media(self, package, toolkit):
+    @callback(IsCommand({"media", "медиа", "медия"}) & HasPhoto())
+    async def download_media(self, toolkit, package):
         """
         Обработчик отправленных пользователем фотографий, который сохраняет
         скачанные фото в папку ассетов
@@ -94,21 +101,21 @@ class Main(Library):
             photos_filtered
         ))
 
-        await asyncio.gather(*[download_file(package.toolkit, image) for image in photos])
-        await toolkit.send_reply(package, DOWNLOAD_PHOTO_MESSAGE)
+        await asyncio.gather(*[download_file(toolkit, image) for image in photos])
+        await toolkit.messages.reply(package, DOWNLOAD_PHOTO_MESSAGE)
 
 
-    @callback(filters.IsCommand({"media", "медиа", "медия"}) & filters.Negation(HasPhoto()))
-    async def send_media_help(self, package, toolkit):
+    @callback(IsCommand({"media", "медиа", "медия"}) & Negation(HasPhoto()))
+    async def send_media_help(self, toolkit, package):
         """
         Инструкции к download_media обработчику
         """
 
-        await toolkit.send_reply(package, NO_PHOTO_MESSAGE)
+        await toolkit.messages.reply(package, NO_PHOTO_MESSAGE)
 
 
     @callback(StickerFilter())
-    async def download_sticker(self, package, toolkit):
+    async def download_sticker(self, toolkit, package):
         """
         Обработчик отправленных пользователем стикеров, который сохраняет
         скачанные стикеры в папку ассетов
@@ -118,4 +125,4 @@ class Main(Library):
         filtered = filter(lambda image: image['height'] == 512, sticker['images'])
         result = await download_file(toolkit, list(filtered)[0]['url'])
 
-        await toolkit.send_reply(package, STICKER_DOWNLOADED.format(result))
+        await toolkit.messages.reply(package, STICKER_DOWNLOADED.format(result))
